@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Ludo</title>
+</head>
+<style type="text/css">
+	:root {
+	  --lg: 40%;
+	  --sm: 20%;
+	  --victory-border: 7vh;
+	}
+
+	* {
+	  box-sizing: border-box;
+	}
+
+	html,
+	body {
+	  margin: 0;
+	  background-color: #445;
+	}
+
+	.board {
+	  position: absolute;
+	  width: 90vh;
+	  height: 90vh;
+	  left: 50%;
+	  top: 50%;
+	  transform: translate(-50%, -50%);
+	  box-shadow: 0 0.5rem 2rem 0rem rgba(0, 0, 0, 0.25);
+	  background-color: black;
+	  display: flex;
+	  flex-direction: column;
+	  border: 25px solid #4D4A4A;
+	  padding: 10px;
+	}
+
+	.row-lg {
+	  display: flex;
+	  flex: var(--lg);
+	}
+
+	.row-sm {
+	  display: flex;
+	  flex: 0 0 var(--sm);
+	}
+
+	.path-v {
+	  flex: 0 0 var(--sm);
+	  display: flex;
+	  flex-direction: row;
+	}
+
+	.path-h {
+	  display: flex;
+	  flex: 0 0 var(--lg);
+	  flex-direction: column;
+	}
+
+	.path {
+	  display: flex;
+	  flex: 0 0 33%;
+	}
+
+	.path-v .path {
+	  flex-direction: column;
+	}
+
+	.path-h .path {
+	  flex-direction: row;
+	}
+
+	.finish {
+	  flex: 0 0 var(--sm);
+	  position: relative;
+	  padding: 5px;
+	}
+
+	.block {
+	  display: block;
+	  flex: 0 0 16.6666%;
+	  background-color: black;
+	  border-radius: 30%;
+	  box-shadow: inset 0 0 1px 1px #445c6b99;
+	  border: 1px solid white;
+	  position: relative;
+	  color: white;
+	  font-size: 1.5em;
+	  opacity: 1;
+	}
+
+	.block:before {
+	  margin-top: -0.05em;
+	  position: absolute;
+	  top: 50%;
+	  left: 50%;
+	  transform: translate(-50%, -50%);
+	}
+
+	.victory {
+	  height: 100%;
+	  width: 100%;
+	  border-top: var(--victory-border) solid #ED1111;
+	  border-right: var(--victory-border) solid #38B626;
+	  border-bottom: var(--victory-border) solid #FFC300 ;
+	  border-left: var(--victory-border) solid #2A31AA ;
+	}
+
+	.victory:before {
+	  content: "🏆";
+	  position: absolute;
+	  padding: 5px;
+	  background-color: white;
+	  border-radius: 50%;
+	  top: 50%;
+	  left: 50%;
+	  transform: translate(-50%, -50%);
+	  box-shadow: 0 0 1rem 0rem rgba(0, 0, 0, 0.25);
+	}
+
+	.row-lg:first-child .path:nth-child(2) .block:not(:first-child),
+	.row-lg:first-child .path:last-child .block:nth-child(2) {
+	  background-color: #ED1111;
+	  border-color: white;
+	}
+
+	.row-lg:first-child .path:last-child .block:nth-child(2):before {
+	  content: "↓";
+	}
+
+	.row-lg:first-child .path:last-child .block:nth-child(6):before {
+	  content: "↘";
+	  color: white;
+	}
+
+	.row-lg:first-child .path:first-child .block:nth-child(3):before {
+	  content: "☆";
+	  color: white;
+	  margin-top: -0.1rem;
+	}
+
+	.row-lg:last-child .path:nth-child(2) .block:not(:last-child),
+	.row-lg:last-child .path:first-child .block:nth-child(5) {
+	  background-color: #FFC300;
+	  border-color: white;
+	}
+
+	.row-lg:last-child .path:first-child .block:nth-child(5):before {
+	  content: "↑";
+	}
+
+	.row-lg:last-child .path:first-child .block:nth-child(1):before {
+	  content: "↖";
+	  color: white;
+	}
+
+	.row-lg:last-child .path:last-child .block:nth-child(4):before {
+	  content: "☆";
+	  color: white;
+	  margin-top: -0.1rem;
+	}
+
+	.row-sm .path-h:first-child .path:nth-child(2) .block:not(:first-child),
+	.row-sm .path-h:first-child .path:first-child .block:nth-child(2) {
+	  background-color: #2A31AA;
+	  border-color: white;
+	}
+
+	.row-sm .path-h:first-child .path:first-child .block:nth-child(2):before {
+	  content: "→";
+	}
+
+	.row-sm .path-h:first-child .path:first-child .block:nth-child(6):before {
+	  content: "↗";
+	  color: white;
+	}
+
+	.row-sm .path-h:first-child .path:last-child .block:nth-child(3):before {
+	  content: "☆";
+	  color: white;
+	  margin-top: -0.1rem;
+	}
+
+	.row-sm .path-h:last-child .path:nth-child(2) .block:not(:last-child),
+	.row-sm .path-h:last-child .path:last-child .block:nth-child(5) {
+	  background-color: #38B626;
+	  border-color: white;
+	}
+
+	.row-sm .path-h:last-child .path:last-child .block:nth-child(5):before {
+	  content: "←";
+	}
+
+	.row-sm .path-h:last-child .path:last-child .block:nth-child(1):before {
+	  content: "↙";
+	  color: white;
+	}
+
+	.row-sm .path-h:last-child .path:first-child .block:nth-child(4):before {
+	  content: "☆";
+	  color: white;
+	  margin-top: -0.1rem;
+	}
+
+	.player-start {
+	  flex: 0 0 var(--lg);
+	  position: relative;
+	}
+
+	.row-lg:first-child .player-start:first-child {
+	  padding: 0 0.5rem 0.5rem 0;
+	}
+
+	.row-lg:first-child .player-start:last-child {
+	  padding: 0 0 0.5rem 0.5rem;
+	}
+
+	.row-lg:last-child .player-start:first-child {
+	  padding: 0.5rem 0.5rem 0 0;
+	}
+
+	.row-lg:last-child .player-start:last-child {
+	  padding: 0.5rem 0 0 0.5rem;
+	}
+
+	.start-wrapper {
+	  display: flex;
+	  flex-direction: row;
+	  flex-wrap: wrap;
+	  height: 100%;
+	  width: 100%;
+	  border-radius: 1rem;
+	}
+
+	.start-block {
+	  flex: 0 0 50%;
+	  height: 50%;
+	  position: relative;
+	}
+
+	.start-block:before {
+	  content: "";
+	  position: absolute;
+	  height: 70%;
+	  width: 70%;
+	  border-radius: 50%;
+	  top: 50%;
+	  left: 50%;
+	  transform: translate(-50%, -50%);
+	  background-color: white;
+	}
+
+	.row-lg:first-child .player-start:first-child .start-wrapper {
+	  background-color: #2A31AA;
+	}
+
+	.row-lg:first-child .player-start:last-child .start-wrapper {
+	  background-color: #ED1111;
+	}
+
+	.row-lg:last-child .player-start:first-child .start-wrapper {
+	  background-color: #FFC300;
+	}
+
+	.row-lg:last-child .player-start:last-child .start-wrapper {
+	  background-color: #38B626;
+	}
+
+	
+		
+</style>
+<body>
+	<div class="board">
+		<div class="row-lg">
+		   	<section class="player-start">
+			    <div class="start-wrapper">
+			       <span class="start-block"></span>
+			       <span class="start-block"></span>
+			       <span class="start-block"></span>
+			       <span class="start-block"></span>
+			    </div>
+		    </section>
+		    <section class="path-v">	
+			    <div class="path">
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			    </div>
+			    <div class="path">
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			    </div>
+			    <div class="path">
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			    </div>
+		    </section>
+		    <section class="player-start">
+			    <div class="start-wrapper">
+			       <span class="start-block"></span>
+			       <span class="start-block"></span>
+			       <span class="start-block"></span>
+			       <span class="start-block"></span>
+			    </div>
+		    </section>
+		</div>
+		<div class="row-sm">
+		    <section class="path-h">
+			    <div class="path">
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			    </div>
+			    <div class="path">
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			    </div>
+			    <div class="path">
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			       <span class="block"></span>
+			    </div>
+		    </section>
+		    <section class="finish">
+		      	<div class="victory"></div>
+		    </section>
+		    <section class="path-h">
+		      	<div class="path">
+		        	<span class="block"></span>
+		        	<span class="block"></span>
+		        	<span class="block"></span>
+		        	<span class="block"></span>
+		        	<span class="block"></span>
+		        	<span class="block"></span>
+		      </div>
+		      <div class="path">
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+		      </div>
+		      <div class="path">
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+		      </div>
+			</section>
+		</div>
+			<div class="row-lg">
+			  	<section class="player-start">
+			      <div class="start-wrapper">
+			        <span class="start-block"></span>
+			        <span class="start-block"></span>
+			        <span class="start-block"></span>
+			        <span class="start-block"></span>
+			      </div>
+			    </section>
+			    <section class="path-v">
+			      <div class="path">
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			      </div>
+			      <div class="path">
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			      </div>
+			      <div class="path">
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			        <span class="block"></span>
+			      </div>
+			    </section>
+			    <section class="player-start">
+			      <div class="start-wrapper">
+			        <span class="start-block"></span>
+			        <span class="start-block"></span>
+			        <span class="start-block"></span>
+			        <span class="start-block"></span>
+			      </div>
+			    </section>
+		</div>
+	</div>
+
+</body>
+</html>
